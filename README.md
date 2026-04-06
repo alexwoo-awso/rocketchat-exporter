@@ -18,6 +18,12 @@ python -m venv .venv
 pip install -e .
 ```
 
+Once published to PyPI, install will be:
+
+```bash
+pip install rocketchat-exporter
+```
+
 ## Future npm Publish
 
 The repository now includes `package.json` and an npm bin wrapper in `bin/rocketchat-exporter.js`.
@@ -77,3 +83,23 @@ For relative attachment URLs, set `--attachment-base-url`.
 
 - `full`: metadata, normalized fields, and raw message payload
 - `content-only`: compact content-focused export
+
+## PyPI Release Setup
+
+The repo is configured for PyPI publishing through GitHub Actions with Trusted Publishing.
+
+Before the first release:
+
+1. Create the PyPI project or publish the first release from GitHub Actions.
+2. In PyPI, add a Trusted Publisher for this repository:
+   - owner: `alexwoo-awso`
+   - repository: `rocketchat-exporter`
+   - workflow: `pypi-publish.yml`
+   - environment: `pypi`
+3. In GitHub, keep the `pypi` environment enabled for the publish workflow.
+
+Release flow:
+
+1. Bump `version` in `pyproject.toml`.
+2. Create a GitHub release.
+3. The `Publish To PyPI` workflow builds, validates, and uploads the package.

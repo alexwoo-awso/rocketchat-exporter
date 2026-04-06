@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68,<77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,13 +7,52 @@ name = "rocketchat-exporter"
 version = "0.1.0"
 description = "CLI exporter for Rocket.Chat MongoDB message data"
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.11"
+authors = [
+  { name = "alexwoo-awso" },
+]
+keywords = [
+  "rocketchat",
+  "rocket-chat",
+  "mongodb",
+  "export",
+  "cli",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Communications :: Chat",
+  "Topic :: Database",
+  "Topic :: System :: Archiving",
+  "Topic :: Utilities",
+]
 dependencies = [
   "pymongo>=4.6,<5",
 ]
 
 [project.scripts]
 rocketchat-exporter = "rocketchat_exporter.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/alexwoo-awso/rocketchat-exporter"
+Repository = "https://github.com/alexwoo-awso/rocketchat-exporter"
+Issues = "https://github.com/alexwoo-awso/rocketchat-exporter/issues"
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2.2",
+  "twine>=6.1.0",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
