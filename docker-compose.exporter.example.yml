@@ -1,0 +1,18 @@
+services:
+  rocketchat-exporter:
+    build:
+      context: .
+    image: rocketchat-exporter:local
+    command:
+      - --config
+      - /work/config.json
+    volumes:
+      - ./config.example.json:/work/config.json:ro
+      - ./exports:/work/exports
+    networks:
+      - rocketchat
+
+networks:
+  rocketchat:
+    external: true
+    name: REPLACE_WITH_EXISTING_ROCKETCHAT_NETWORK

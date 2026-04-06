@@ -51,6 +51,53 @@ Or use a config file:
 rocketchat-exporter --config config.example.json
 ```
 
+## Docker Usage
+
+You can run the exporter as a one-shot Docker container attached to the same Docker network as Rocket.Chat and MongoDB.
+
+Build the image:
+
+```bash
+docker build -t rocketchat-exporter:local .
+```
+
+Run it on the existing Rocket.Chat network:
+
+```bash
+docker run --rm \
+  --network YOUR_ROCKETCHAT_NETWORK \
+  -v "$PWD/exports:/work/exports" \
+  rocketchat-exporter:local \
+  --mongo-uri "mongodb://mongodb:27017/rocketchat?authSource=admin" \
+  --database rocketchat \
+  --username alice \
+  --smart-context \
+  --format html \
+  --output /work/exports/alice.html
+```
+
+If your Mongo service name inside Docker Compose is not `mongodb`, use the actual compose service name instead.
+
+You can also run it with a mounted config file:
+
+```bash
+docker run --rm \
+  --network YOUR_ROCKETCHAT_NETWORK \
+  -v "$PWD/config.json:/work/config.json:ro" \
+  -v "$PWD/exports:/work/exports" \
+  rocketchat-exporter:local \
+  --config /work/config.json
+```
+
+An example compose file is included in `docker-compose.exporter.example.yml`. Set the external network name to the existing Rocket.Chat Docker network before using it.
+
+Notes:
+
+- The container is designed for one-shot exports, not a long-running service.
+- Use Docker-network hostnames from your Rocket.Chat stack for `--mongo-uri`.
+- For `json-with-attachments`, also set `--attachment-base-url` to your Rocket.Chat base URL.
+- Write outputs to a mounted host directory such as `/work/exports`.
+
 ## Filters
 
 - `--room-id`, `--room-name`: repeatable and comma-separated
