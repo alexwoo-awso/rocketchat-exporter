@@ -55,10 +55,10 @@ rocketchat-exporter --config config.example.json
 
 You can run the exporter as a one-shot Docker container attached to the same Docker network as Rocket.Chat and MongoDB.
 
-Build the image:
+Pull the prebuilt image from GHCR:
 
 ```bash
-docker build -t rocketchat-exporter:local .
+docker pull ghcr.io/alexwoo-awso/rocketchat-exporter:latest
 ```
 
 Run it on the existing Rocket.Chat network:
@@ -67,7 +67,7 @@ Run it on the existing Rocket.Chat network:
 docker run --rm \
   --network YOUR_ROCKETCHAT_NETWORK \
   -v "$PWD/exports:/work/exports" \
-  rocketchat-exporter:local \
+  ghcr.io/alexwoo-awso/rocketchat-exporter:latest \
   --mongo-uri "mongodb://mongodb:27017/rocketchat?authSource=admin" \
   --database rocketchat \
   --username alice \
@@ -85,7 +85,7 @@ docker run --rm \
   --network YOUR_ROCKETCHAT_NETWORK \
   -v "$PWD/config.json:/work/config.json:ro" \
   -v "$PWD/exports:/work/exports" \
-  rocketchat-exporter:local \
+  ghcr.io/alexwoo-awso/rocketchat-exporter:latest \
   --config /work/config.json
 ```
 
@@ -94,6 +94,7 @@ An example compose file is included in `docker-compose.exporter.example.yml`. Se
 Notes:
 
 - The container is designed for one-shot exports, not a long-running service.
+- GitHub releases publish the image to `ghcr.io/alexwoo-awso/rocketchat-exporter`.
 - Use Docker-network hostnames from your Rocket.Chat stack for `--mongo-uri`.
 - For `json-with-attachments`, also set `--attachment-base-url` to your Rocket.Chat base URL.
 - Write outputs to a mounted host directory such as `/work/exports`.
