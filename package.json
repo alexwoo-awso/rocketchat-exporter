@@ -1,0 +1,29 @@
+{
+  "name": "rocketchat-exporter",
+  "version": "0.1.0",
+  "description": "CLI wrapper for the Rocket.Chat MongoDB exporter",
+  "bin": {
+    "rocketchat-exporter": "./bin/rocketchat-exporter.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "pyproject.toml",
+    "requirements.txt",
+    "config.example.json"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check": "python -m unittest discover -s tests -v"
+  },
+  "keywords": [
+    "rocketchat",
+    "mongodb",
+    "export",
+    "python",
+    "cli"
+  ]
+}

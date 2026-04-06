@@ -1,0 +1,17 @@
+{
+  "mongo_uri": "mongodb://localhost:27017/?directConnection=true",
+  "database": "rocketchat",
+  "output": "exports/messages.json",
+  "format": "json",
+  "mode": "full",
+  "smart_context": true,
+  "room_names": ["general", "support"],
+  "room_ids": [],
+  "usernames": ["alice", "bob"],
+  "user_ids": [],
+  "date_from": "2026-04-01",
+  "date_to": "2026-04-30",
+  "dates": ["2026-04-05", "2026-04-11"],
+  "attachments_dir": "exports/attachments",
+  "attachment_base_url": "https://chat.example.com"
+}
