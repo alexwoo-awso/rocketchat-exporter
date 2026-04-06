@@ -20,7 +20,7 @@ pip install -e .
 
 ## Future npm Publish
 
-The repository now includes [package.json](C:/Users/olek/Documents/GitHub/rocketchat-exporter/package.json) and an npm bin wrapper at [rocketchat-exporter.js](C:/Users/olek/Documents/GitHub/rocketchat-exporter/bin/rocketchat-exporter.js).
+The repository now includes `package.json` and an npm bin wrapper in `bin/rocketchat-exporter.js`.
 
 That gives you a clean future npm publishing path with the same `rocketchat-exporter` command name, but this remains a Python application. The npm package will still require Python 3.11+ and Python dependencies on the target server unless you later switch to shipping a standalone binary build.
 
