@@ -60,6 +60,8 @@ class MessageRecord:
 class Filters:
     room_ids: set[str] = field(default_factory=set)
     room_names: set[str] = field(default_factory=set)
+    excluded_room_ids: set[str] = field(default_factory=set)
+    excluded_room_names: set[str] = field(default_factory=set)
     user_ids: set[str] = field(default_factory=set)
     usernames: set[str] = field(default_factory=set)
     dates: set[datetime] = field(default_factory=set)

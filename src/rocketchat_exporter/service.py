@@ -77,14 +77,25 @@ class RocketChatExportService:
         query: dict[str, Any] = {}
 
         room_ids = set(filters.room_ids)
-        matched_room_ids = set()
+        matched_room_ids: set[str] = set()
         if filters.room_names:
-            matched_room_ids = self._resolve_room_ids(room_map)
+            matched_room_ids = self._resolve_room_ids(room_map, filters.room_names)
             room_ids.update(matched_room_ids)
         if filters.room_names and not matched_room_ids and not filters.room_ids:
             return {"rid": {"$in": []}}
-        if room_ids:
-            query["rid"] = {"$in": sorted(room_ids)}
+
+        excluded_room_ids = set(filters.excluded_room_ids)
+        if filters.excluded_room_names:
+            excluded_room_ids.update(
+                self._resolve_room_ids(room_map, filters.excluded_room_names)
+            )
+
+        room_query = self._build_room_query(
+            included_room_ids=room_ids,
+            excluded_room_ids=excluded_room_ids,
+        )
+        if room_query is not None:
+            query["rid"] = room_query
 
         user_clauses: list[dict[str, Any]] = []
         if filters.user_ids:
@@ -129,11 +140,14 @@ class RocketChatExportService:
 
         return query
 
-    def _resolve_room_ids(self, room_map: dict[str, dict[str, Any]]) -> set[str]:
+    def _resolve_room_ids(
+        self,
+        room_map: dict[str, dict[str, Any]],
+        expected_names: set[str],
+    ) -> set[str]:
         matched_ids = set()
-        expected = self.options.filters.room_names
         for room_id, room in room_map.items():
-            if room.get("name") in expected or room.get("fname") in expected:
+            if room.get("name") in expected_names or room.get("fname") in expected_names:
                 matched_ids.add(room_id)
         return matched_ids
 
@@ -146,6 +160,7 @@ class RocketChatExportService:
         room_map: dict[str, dict[str, Any]],
     ) -> dict[str, dict[str, Any]]:
         context_messages: dict[str, dict[str, Any]] = {}
+        room_query = self._build_context_room_query(room_map)
         thread_ids = {message.get("tmid") for message in direct_messages if message.get("tmid")}
         if self.options.filters.include_replies:
             thread_ids.update(
@@ -154,7 +169,10 @@ class RocketChatExportService:
                 if self._message_starts_thread(message)
             )
         if thread_ids:
-            for message in collection.find({"tmid": {"$in": sorted(thread_ids)}}):
+            query: dict[str, Any] = {"tmid": {"$in": sorted(thread_ids)}}
+            if room_query is not None:
+                query["rid"] = room_query
+            for message in collection.find(query):
                 message_id = str(message["_id"])
                 if message_id in known_ids:
                     continue
@@ -167,7 +185,10 @@ class RocketChatExportService:
                 if message.get("tmid")
             }
             if original_ids:
-                for message in collection.find({"_id": {"$in": sorted(original_ids)}}):
+                query = {"_id": {"$in": sorted(original_ids)}}
+                if room_query is not None:
+                    query["rid"] = room_query
+                for message in collection.find(query):
                     message_id = str(message["_id"])
                     if message_id in known_ids:
                         continue
@@ -323,6 +344,8 @@ class RocketChatExportService:
             "filters": {
                 "room_ids": sorted(self.options.filters.room_ids),
                 "room_names": sorted(self.options.filters.room_names),
+                "excluded_room_ids": sorted(self.options.filters.excluded_room_ids),
+                "excluded_room_names": sorted(self.options.filters.excluded_room_names),
                 "user_ids": sorted(self.options.filters.user_ids),
                 "usernames": sorted(self.options.filters.usernames),
                 "date_from": serialize_datetime(self.options.filters.date_from),
@@ -345,3 +368,32 @@ class RocketChatExportService:
     def _sort_key(self, message: dict[str, Any]) -> tuple[datetime, str]:
         created_at = self._safe_datetime(message.get("ts")) or datetime.min.replace(tzinfo=UTC)
         return created_at, str(message.get("_id"))
+
+    def _build_context_room_query(
+        self,
+        room_map: dict[str, dict[str, Any]],
+    ) -> dict[str, Any] | None:
+        excluded_room_ids = set(self.options.filters.excluded_room_ids)
+        if self.options.filters.excluded_room_names:
+            excluded_room_ids.update(
+                self._resolve_room_ids(room_map, self.options.filters.excluded_room_names)
+            )
+        return self._build_room_query(
+            included_room_ids=set(),
+            excluded_room_ids=excluded_room_ids,
+        )
+
+    def _build_room_query(
+        self,
+        *,
+        included_room_ids: set[str],
+        excluded_room_ids: set[str],
+    ) -> dict[str, Any] | None:
+        if included_room_ids and excluded_room_ids:
+            effective_ids = included_room_ids - excluded_room_ids
+            return {"$in": sorted(effective_ids)}
+        if included_room_ids:
+            return {"$in": sorted(included_room_ids)}
+        if excluded_room_ids:
+            return {"$nin": sorted(excluded_room_ids)}
+        return None

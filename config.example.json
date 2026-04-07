@@ -7,6 +7,8 @@
   "smart_context": true,
   "room_names": ["general", "support"],
   "room_ids": [],
+  "excluded_room_names": ["staff"],
+  "excluded_room_ids": [],
   "usernames": ["alice", "bob"],
   "user_ids": [],
   "date_from": "2026-04-01",

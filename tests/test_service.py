@@ -96,6 +96,30 @@ class ServiceQueryTests(unittest.TestCase):
 
         self.assertEqual(query, {"rid": {"$in": []}})
 
+    def test_excluded_room_is_removed_from_query(self) -> None:
+        options = build_options()
+        options.filters.room_ids = {"room-1", "room-2"}
+        options.filters.excluded_room_ids = {"room-2"}
+        service = RocketChatExportService(options)
+
+        query = service._build_direct_query({})
+
+        self.assertEqual(query["rid"], {"$in": ["room-1"]})
+
+    def test_context_query_excludes_blocked_rooms(self) -> None:
+        options = build_options()
+        options.filters.excluded_room_names = {"Secret"}
+        service = RocketChatExportService(options)
+
+        room_query = service._build_context_room_query(
+            {
+                "room-1": {"name": "general", "fname": "General"},
+                "room-2": {"name": "secret", "fname": "Secret"},
+            }
+        )
+
+        self.assertEqual(room_query, {"$nin": ["room-2"]})
+
     def test_collect_messages_adds_context_messages(self) -> None:
         options = build_options()
         options.filters.usernames = {"alice"}

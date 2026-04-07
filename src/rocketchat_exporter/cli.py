@@ -36,6 +36,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Room name filter. Repeat or pass comma-separated values.",
     )
     parser.add_argument(
+        "--exclude-room-id",
+        action="append",
+        help="Room ID exclusion filter. Repeat or pass comma-separated values.",
+    )
+    parser.add_argument(
+        "--exclude-room-name",
+        action="append",
+        help="Room name exclusion filter. Repeat or pass comma-separated values.",
+    )
+    parser.add_argument(
         "--user-id",
         action="append",
         help="User ID filter. Repeat or pass comma-separated values.",
@@ -114,6 +124,28 @@ def parse_filters(args: argparse.Namespace, config: dict[str, Any]) -> Filters:
         room_ids=set(_read_multi_value(args.room_id, config, "room_ids", "room_id", "room-id")),
         room_names=set(
             _read_multi_value(args.room_name, config, "room_names", "room_name", "room-name")
+        ),
+        excluded_room_ids=set(
+            _read_multi_value(
+                args.exclude_room_id,
+                config,
+                "excluded_room_ids",
+                "exclude_room_ids",
+                "exclude_room_id",
+                "exclude-room-ids",
+                "exclude-room-id",
+            )
+        ),
+        excluded_room_names=set(
+            _read_multi_value(
+                args.exclude_room_name,
+                config,
+                "excluded_room_names",
+                "exclude_room_names",
+                "exclude_room_name",
+                "exclude-room-names",
+                "exclude-room-name",
+            )
         ),
         user_ids=set(_read_multi_value(args.user_id, config, "user_ids", "user_id", "user-id")),
         usernames=set(

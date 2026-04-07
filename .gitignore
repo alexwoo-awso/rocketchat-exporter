@@ -15,3 +15,5 @@ node_modules/
 exports/
 .env
 .envrc
+config.json
+docker-compose.yml

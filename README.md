@@ -102,11 +102,13 @@ Notes:
 ## Filters
 
 - `--room-id`, `--room-name`: repeatable and comma-separated
+- `--exclude-room-id`, `--exclude-room-name`: optional room exclusions, repeatable and comma-separated
 - `--user-id`, `--username`: repeatable and comma-separated
 - `--date-from`, `--date-to`: inclusive UTC range
 - `--date`: specific UTC dates to include; can be repeated
 
 If both explicit dates and a range are provided, both constraints apply.
+Excluded rooms are removed from both direct matches and smart-context expansion.
 
 ## Smart Context
 
