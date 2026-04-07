@@ -182,6 +182,35 @@ class ServiceQueryTests(unittest.TestCase):
         self.assertEqual(summary["message_count"], 3)
         self.assertEqual(summary["direct_match_count"], 1)
 
+    def test_normalize_message_includes_file_upload_entries(self) -> None:
+        service = RocketChatExportService(build_options())
+
+        normalized = service._normalize_message(
+            {
+                "_id": "m1",
+                "rid": "room-1",
+                "msg": "Attachment",
+                "u": {"_id": "u1", "username": "alice", "name": "Alice"},
+                "ts": datetime(2026, 4, 1, 12, 0, tzinfo=UTC),
+                "_updatedAt": datetime(2026, 4, 1, 12, 0, tzinfo=UTC),
+                "attachments": [],
+                "file": {
+                    "_id": "f1",
+                    "name": "report.pdf",
+                    "type": "application/pdf",
+                    "_downloadRoute": "/file-upload/f1/report.pdf",
+                },
+            },
+            room_map={"room-1": {"name": "general", "fname": "General", "t": "c"}},
+        )
+
+        self.assertEqual(len(normalized["attachments"]), 1)
+        self.assertEqual(normalized["attachments"][0]["title"], "report.pdf")
+        self.assertEqual(
+            normalized["attachments"][0]["title_link"],
+            "/file-upload/f1/report.pdf",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

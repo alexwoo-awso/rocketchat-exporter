@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from rocketchat_exporter import cli
 from rocketchat_exporter.cli import parse_filters
 
 
@@ -70,6 +71,29 @@ class ParseFiltersTests(unittest.TestCase):
         self.assertEqual(filters.usernames, {"alice"})
         self.assertEqual(len(filters.dates), 1)
         self.assertFalse(filters.include_replies)
+
+    def test_main_rejects_attachment_settings_with_plain_json_format(self) -> None:
+        original_argv = sys.argv
+        sys.argv = [
+            "rocketchat-exporter",
+            "--mongo-uri",
+            "mongodb://example",
+            "--database",
+            "rocketchat",
+            "--output",
+            "out.json",
+            "--format",
+            "json",
+            "--attachments-dir",
+            "exports/attachments",
+        ]
+        try:
+            with self.assertRaises(SystemExit) as ctx:
+                cli.main()
+        finally:
+            sys.argv = original_argv
+
+        self.assertIn("json-with-attachments", str(ctx.exception))
 
 
 if __name__ == "__main__":

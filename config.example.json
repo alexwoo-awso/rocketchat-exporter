@@ -2,7 +2,7 @@
   "mongo_uri": "mongodb://localhost:27017/?directConnection=true",
   "database": "rocketchat",
   "output": "exports/messages.json",
-  "format": "json",
+  "format": "json-with-attachments",
   "mode": "full",
   "smart_context": true,
   "room_names": ["general", "support"],

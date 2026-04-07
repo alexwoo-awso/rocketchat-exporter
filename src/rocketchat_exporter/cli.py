@@ -198,6 +198,12 @@ def main() -> int:
     )
     compact = _read_bool_flag(args.compact, config, "compact")
 
+    if output_format == "json" and (attachments_dir or attachment_base_url):
+        raise SystemExit(
+            "Attachment export requires format 'json-with-attachments'. "
+            "Set --format json-with-attachments when using attachments-dir or attachment-base-url."
+        )
+
     options = ExportOptions(
         mongo_uri=str(mongo_uri),
         database_name=str(database),

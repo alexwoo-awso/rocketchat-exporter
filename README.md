@@ -96,7 +96,8 @@ Notes:
 - The container is designed for one-shot exports, not a long-running service.
 - GitHub releases publish the image to `ghcr.io/alexwoo-awso/rocketchat-exporter`.
 - Use Docker-network hostnames from your Rocket.Chat stack for `--mongo-uri`.
-- For `json-with-attachments`, also set `--attachment-base-url` to your Rocket.Chat base URL.
+- Attachment download only runs with `--format json-with-attachments`.
+- For `json-with-attachments`, set `--attachments-dir` and also set `--attachment-base-url` to your Rocket.Chat base URL.
 - Write outputs to a mounted host directory such as `/work/exports`.
 
 ## Filters
@@ -127,6 +128,7 @@ Use `--no-replies` or `--no-originals` to disable either side of the expansion.
 - `json-with-attachments`: same JSON, plus attachment download attempts and local file paths
 - `html`: readable single-file export
 
+If you set `--attachments-dir` or `--attachment-base-url`, you must also set `--format json-with-attachments`.
 For relative attachment URLs, set `--attachment-base-url`.
 
 ## Modes

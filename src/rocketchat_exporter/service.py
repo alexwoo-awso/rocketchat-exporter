@@ -235,19 +235,7 @@ class RocketChatExportService:
         room_id = str(message.get("rid", ""))
         room = room_map.get(room_id, {})
         user = message.get("u") or {}
-        attachments = [
-            {
-                "title": attachment.get("title"),
-                "type": attachment.get("type"),
-                "description": attachment.get("description"),
-                "title_link": attachment.get("title_link"),
-                "image_url": attachment.get("image_url"),
-                "audio_url": attachment.get("audio_url"),
-                "video_url": attachment.get("video_url"),
-                "mime_type": attachment.get("mimeType"),
-            }
-            for attachment in message.get("attachments", [])
-        ]
+        attachments = self._normalize_attachments(message)
         mentions = [
             {
                 "user_id": mention.get("_id"),
@@ -293,6 +281,67 @@ class RocketChatExportService:
                 "thread_id": normalized["thread_id"],
                 "context_reason": normalized["context_reason"],
             }
+        return normalized
+
+    def _normalize_attachments(self, message: dict[str, Any]) -> list[dict[str, object]]:
+        attachments = [
+            self._normalize_attachment_entry(attachment)
+            for attachment in message.get("attachments", [])
+            if isinstance(attachment, dict)
+        ]
+
+        known_urls = {
+            str(item.get("title_link") or item.get("image_url") or item.get("audio_url") or item.get("video_url"))
+            for item in attachments
+            if any(item.get(key) for key in ("title_link", "image_url", "audio_url", "video_url"))
+        }
+        for file_entry in self._normalize_file_entries(message):
+            file_url = str(file_entry.get("title_link") or "")
+            if file_url and file_url in known_urls:
+                continue
+            attachments.append(file_entry)
+        return attachments
+
+    def _normalize_attachment_entry(self, attachment: dict[str, Any]) -> dict[str, object]:
+        return {
+            "title": attachment.get("title"),
+            "type": attachment.get("type"),
+            "description": attachment.get("description"),
+            "title_link": attachment.get("title_link"),
+            "image_url": attachment.get("image_url"),
+            "audio_url": attachment.get("audio_url"),
+            "video_url": attachment.get("video_url"),
+            "mime_type": attachment.get("mimeType"),
+        }
+
+    def _normalize_file_entries(self, message: dict[str, Any]) -> list[dict[str, object]]:
+        file_candidates: list[dict[str, Any]] = []
+        file_info = message.get("file")
+        if isinstance(file_info, dict):
+            file_candidates.append(file_info)
+
+        files = message.get("files")
+        if isinstance(files, list):
+            file_candidates.extend(item for item in files if isinstance(item, dict))
+
+        normalized: list[dict[str, object]] = []
+        for file_item in file_candidates:
+            normalized.append(
+                {
+                    "title": file_item.get("name") or file_item.get("filename"),
+                    "type": file_item.get("type"),
+                    "description": None,
+                    "title_link": (
+                        file_item.get("path")
+                        or file_item.get("url")
+                        or file_item.get("_downloadRoute")
+                    ),
+                    "image_url": None,
+                    "audio_url": None,
+                    "video_url": None,
+                    "mime_type": file_item.get("type") or file_item.get("mimeType"),
+                }
+            )
         return normalized
 
     def _sanitize_raw(self, message: dict[str, Any]) -> dict[str, object]:
